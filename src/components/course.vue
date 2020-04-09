@@ -1,10 +1,14 @@
 <template>
+<div id="app">
   <div id="courseOutlineGraph" class="graph_container">
   </div>
+  <!-- <div v-for="(item, index) in entities" :key="index">
+    <p>{{item.name}}</p>
+  </div> -->
+</div>
 </template>
 
 <script>
-// eslint-disable-next-line no-unused-vars
 import { getAllEntitiesByCourse, getAllLinksByCourse } from '../unit/fetch/graph'
 
 export default {
@@ -12,63 +16,69 @@ export default {
   data () {
     return {
       entities: [],
-      links: []
+      relationships: []
     }
   },
-  mounted () {
+  created: function () {
+    console.log(0)
     this.init()
-    this.drawChart(this.entities, this.links)
+  },
+  mounted () {
+    console.log(1)
+    this.drawChart()
   },
   methods: {
     async init () {
+      console.log(2)
       this.initGraphEntities()
-      // console.log(this.entities)
       this.initGraphLinks()
-      // console.log(this.links)
     },
     async initGraphEntities () {
+      console.log(3)
       try {
         this.entities = []
         const info = await getAllEntitiesByCourse({
           course: '机器学习',
           mapName: '机器学习大纲知识图谱'
         })
-        // console.log(info)
-        info.data.map((item, index) => {
+        for (var i = 0; i < [...info.data].length; i++) {
           var entity = {
-            name: item.name,
-            category: item.category,
+            name: [...info.data][i].name,
+            category: [...info.data][i].category,
             draggable: 'true'
           }
           this.entities.push(entity)
-        })
+        }
+        // console.log(this.entities)
       } catch (e) {
         console.log(e.message)
       }
     },
     async initGraphLinks () {
+      console.log(4)
       try {
-        this.links = []
+        this.relationships = []
         const info = await getAllLinksByCourse({
           course: '机器学习',
           mapName: '机器学习大纲知识图谱'
         })
-        info.data.map((item, index) => {
-          var link = {
-            source: item.source,
-            target: item.target,
-            value: item.relationship
+        for (var i = 0; i < [...info.data].length; i++) {
+          var relationship = {
+            source: [...info.data][i].source,
+            target: [...info.data][i].target,
+            value: [...info.data][i].relationship
           }
-          this.links.push(link)
-        })
+          this.relationships.push(relationship)
+        }
+        console.log(this.relationships)
       } catch (e) {
         console.log(e.message)
       }
     },
-    drawChart (entities, links) {
-      // console.log(entities)
-      // console.log(links)
+    drawChart () {
+      console.log(5)
       let myChart = this.$echarts.init(document.getElementById('courseOutlineGraph'))
+
       let option = {
         title: {
           text: ''
@@ -84,6 +94,11 @@ export default {
               fontSize: 12
             }
           }
+        },
+        legend: {
+          x: 'center',
+          show: false,
+          data: ['课程', '章']
         },
         series: [
           {
@@ -134,8 +149,8 @@ export default {
                 formatter: '{c}'
               }
             },
-            data: entities,
-            links: links,
+            data: this.entities,
+            links: this.relationships,
             lineStyle: {
               normal: {
                 opacity: 0.9,
@@ -148,6 +163,9 @@ export default {
         ]
       }
       myChart.setOption(option)
+      // console.log(option.series.type)
+      // console.log(option.series.links)
+      // }
     }
   }
 
