@@ -20,7 +20,7 @@ export function executeFetch (...args) {
   })
 }
 
-export const hostname = 'http://192.168.0.104:8080'
+export const hostname = 'http://192.168.0.105:8080'
 
 export const address = {
   graph: hostname

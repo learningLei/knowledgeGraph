@@ -27,8 +27,74 @@ export function getAllEntitiesByCourse (info) {
   })
 }
 
+export function getEntitiesNumberByCourseExcept (info) {
+  let url = `${hostname}/findEntitiesNumberByCourseExcept${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function updateEntityById (info) {
+  let url = `${hostname}/updateEntityById${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function deleteEntityById (info) {
+  let url = `${hostname}/deleteEntityById${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function setPptPageByEntity (info) {
+  let url = `${hostname}/setPptPageByEntity${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
 export function getAllLinksByCourse (info) {
   let url = `${hostname}/findAllLinksByCourse${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function updateLinkById (info) {
+  let url = `${hostname}/updateLinkById${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function deleteLinkById (info) {
+  let url = `${hostname}/deleteLinkById${objToQueryString(info)}`
 
   return executeFetch(url, {
     methods: 'Get',
