@@ -72,7 +72,7 @@ export function drawLevelBarChart (level, levelNumber) {
     },
     legend: {
       data: [{
-        name: '占所有知识点的百分比'
+        name: '该等级知识数量占所有知识点数量的比例'
       }]
     },
     xAxis: {
@@ -93,7 +93,7 @@ export function drawLevelBarChart (level, levelNumber) {
       }
     },
     series: [{
-      name: '占所有知识点的百分比',
+      name: '该等级知识数量占所有知识点数量的比例',
       type: 'bar',
       data: levelNumber
     }]

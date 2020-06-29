@@ -38,6 +38,17 @@ export function updateStuEntityByAccountAndEntity (info) {
   })
 }
 
+export function updateKfByAccountAndEntity (info) {
+  let url = `${hostname}/updateKfByAccountAndEntity${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
 export function getCountByAccountAndCourse (info) {
   let url = `${hostname}/findCountByAccountAndCourse${objToQueryString(info)}`
 
@@ -51,6 +62,18 @@ export function getCountByAccountAndCourse (info) {
 
 export function getAllStuEntityByAccountAndCourse (info) {
   let url = `${hostname}/findAllStuEntityByAccountAndCourse${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function getAllKfByAccountAndCourse (info) {
+  let url = `${hostname}/findAllKfByAccountAndCourse${objToQueryString(info)}`
 
   return executeFetch(url, {
     methods: 'Get',

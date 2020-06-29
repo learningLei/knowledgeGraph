@@ -38,6 +38,17 @@ export function getEntitiesNumberByCourseExcept (info) {
   })
 }
 
+export function getPptPageByNameAndCourse (info) {
+  let url = `${hostname}/findPptPageByNameAndCourse${objToQueryString(info)}`
+
+  return executeFetch(url, {
+    methods: 'Get',
+    header: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
 export function updateEntityById (info) {
   let url = `${hostname}/updateEntityById${objToQueryString(info)}`
 

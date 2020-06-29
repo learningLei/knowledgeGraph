@@ -149,6 +149,62 @@
           </el-tab-pane>
         </el-tabs>
       </el-tab-pane>
+      <el-tab-pane label="作业管理">
+        <el-button @click="uploadTpaperDialog = true" style="margin-bottom: 30px">上传作业</el-button>
+        <el-table :data="tpaperList" style="width: 721px; margin: 0 auto" border>
+          <el-table-column prop="course" label="课程名称" width="180"></el-table-column>
+          <el-table-column prop="heading" label="作业名称" width="180"></el-table-column>
+          <el-table-column prop="pnumber" label="作业次数" width="180"></el-table-column>
+          <el-table-column label="操作" width="180">
+            <template slot-scope="scope">
+              <!-- <el-button size="mini" @click="showTags(scope.row)">查看标签</el-button> -->
+              <el-popover placement="right" width="202" trigger="click">
+                <el-table :data="tags" style="width: 201px">
+                  <el-table-column width="150" prop="tag" label="标签名称"></el-table-column>
+                  <el-table-column width="50" prop="ratio" label="占比"></el-table-column>
+                </el-table>
+                <el-button slot="reference" @click="showTags(scope.row)">查看标签</el-button>
+              </el-popover>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-dialog title="上传课程作业" :visible.sync="uploadTpaperDialog" width="60%">
+          <span>
+            <div style="margin-bottom: 20px">课程名称：<el-input placeholder="请输入课程" v-model="tcourse" style="width: 40%"></el-input></div>
+            <div style="margin-bottom: 20px">作业次数：<el-input placeholder="请输入作业的次数" v-model="tpnumber" style="width: 40%"></el-input></div>
+            <div style="margin-bottom: 20px">作业标题：<el-input placeholder="请输入作业标题" v-model="theading" style="width: 40%"></el-input></div>
+            <div style="margin-bottom: 20px"><i class="el-icon-plus"></i><el-button type="text" @click="toAddTag">添加标签</el-button></div>
+            <el-dialog width="30%" title="添加标签" :visible.sync="addTagDialog" append-to-body>
+              <el-select style="margin-bottom: 20px" placeholder="选择章节" v-model="tchapter">
+                <el-option v-for="item in tchapterList" :key="item.id" :label="item.name" :value="item.name"></el-option>
+              </el-select>
+              <el-button style="margin-bottom: 20px" @click="getAllTags">确定</el-button>
+              <el-select style="margin-bottom: 20px" v-if="tchapter !== '' && tentityList.length !== 0" placeholder="选择标签" v-model="tag">
+                <el-option v-for="item in tentityList" :key="item.id" :label="item.name" :value="item.name"></el-option>
+              </el-select>
+              <div style="margin-bottom: 20px" v-if="tchapter !== '' && tentityList.length !== 0">占比(输入100以内正整数)：<el-input placeholder="请输入标签所占百分比" v-model="ratio" style="width: 40%"></el-input> % </div>
+              <el-button v-if="tchapter !== '' && tentityList.length !== 0" style="margin-bottom: 20px" @click="addTag">确定</el-button>
+              <el-table :data="tagList" style="width: 100%" border>
+              <el-table-column prop="tag" label="标签名称" width="150"></el-table-column>
+              <el-table-column prop="ratio" label="百分比(%)" width="150"></el-table-column>
+              <el-table-column label="操作">
+                <template slot-scope="scope">
+                  <el-button size="mini" @click="deleteTag(scope.row)">删除</el-button>
+                </template>
+              </el-table-column>
+              </el-table>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="addTagDialog = false">取消</el-button>
+                <el-button type="primary" @click="addTagDialog = false">确定</el-button>
+              </span>
+            </el-dialog>
+          </span>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="uploadTpaperDialog = false">取消</el-button>
+            <el-button type="primary" @click="uploadTpaper">确定</el-button>
+          </span>
+        </el-dialog>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -156,6 +212,9 @@
 <script>
 import { getAllEntitiesByCourse, getAllLinksByCourse, updateEntityById, deleteEntityById, updateLinkById, deleteLinkById } from '../unit/fetch/graph'
 import { getStuEntityByCourseAndEntity, getStuEntityByCourseAndStudent } from '../unit/fetch/stuentity'
+// eslint-disable-next-line no-unused-vars
+import { insertTpaper, getTaperByAccount } from '../unit/fetch/tpaper'
+import { insertPaperTag, getPaperTagByCourseAndPnumber } from '../unit/fetch/papertag'
 import { drawKnowledgeBarChart } from '../unit/tool'
 
 export default {
@@ -198,7 +257,21 @@ export default {
       knowledges: [],
       knowledgeNumbers: [],
       studentList: [],
-      stuStudies: []
+      stuStudies: [],
+      uploadTpaperDialog: false,
+      tcourse: '',
+      theading: '',
+      tpnumber: 0,
+      addTagDialog: false,
+      tchapter: '',
+      tchapterList: [],
+      tentity: '',
+      tentityList: [],
+      tag: '',
+      ratio: '',
+      tagList: [],
+      tpaperList: [],
+      tags: []
     }
   },
   mounted () {
@@ -206,6 +279,10 @@ export default {
   },
   methods: {
     async init () {
+      const info = await getTaperByAccount({
+        account: 'T00001'
+      })
+      this.tpaperList = [...info.data]
     },
     handleClick () {
       this.course = ''
@@ -428,6 +505,69 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+    async toAddTag () {
+      this.tchapter = ''
+      if (this.tcourse !== '') {
+        this.addTagDialog = true
+        this.tchapterList = []
+        const info = await getAllEntitiesByCourse({
+          course: this.tcourse,
+          mapName: this.tcourse + '大纲知识图谱'
+        })
+        this.tchapterList = [...info.data]
+      } else {
+        alert('请先填写课程名称！')
+      }
+    },
+    async getAllTags () {
+      this.tentityList = []
+      const info = await getAllEntitiesByCourse({
+        course: this.tcourse,
+        mapName: this.tchapter + '章节知识图谱'
+      })
+      this.tentityList = [...info.data]
+    },
+    addTag () {
+      this.tagList.push({tag: this.tag, ratio: this.ratio})
+    },
+    deleteTag (row) {
+      // console.log(row)
+      var tmpArr = this.tagList
+      // console.log(tmpArr)
+      this.tagList = []
+      for (var i = 0; i < tmpArr.length; i++) {
+        if (tmpArr[i].tag !== row.tag) {
+          this.tagList.push(tmpArr[i])
+        }
+      }
+      // console.log(this.tagList)
+    },
+    async uploadTpaper () {
+      await insertTpaper({
+        account: 'T00001',
+        course: this.tcourse,
+        heading: this.theading,
+        pnumber: this.tpnumber
+      })
+      for (var i = 0; i < this.tagList.length; i++) {
+        // console.log(this.tagList[i])
+        await insertPaperTag({
+          course: this.tcourse,
+          pnumber: this.tpnumber,
+          tag: this.tagList[i].tag,
+          ratio: this.tagList[i].ratio
+        })
+      }
+      this.uploadTpaperDialog = false
+    },
+    async showTags (row) {
+      this.tags = []
+      const info = await getPaperTagByCourseAndPnumber({
+        course: row.course,
+        pnumber: row.pnumber
+      })
+      this.tags = [...info.data]
     }
   }
 }

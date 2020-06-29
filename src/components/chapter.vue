@@ -1,9 +1,11 @@
 <template>
   <div id="app">
     <div class="test">
-      <div id="courseChapterGraph" class="chapter_graph">
+      <div id="courseChapterGraph" class="chapter_graph"></div>
+      <div>
+        <iframe :src="pptPageSite" id="ppt" width="100%" height="1200px"></iframe>
+        <!-- <iframe src="http://editor.minslab.info/service-player?title=%E5%86%B3%E7%AD%96%E6%A0%91#/12" width="100%" height="1200px"></iframe> -->
       </div>
-      <iframe :src="pptPageSite" id="ppt" scrolling = "no" width="100%" height="1200px"></iframe>
     </div>
   </div>
 </template>
@@ -23,6 +25,8 @@ export default {
       relationships: [],
       // ppt播放网页
       pptPageSite: '',
+      // 传过来的ppt页数
+      pptPage: this.$route.query.pptPage,
       // 实体节点和ppt页数对应
       enppts: new Map()
     }
@@ -46,7 +50,11 @@ export default {
   },
   methods: {
     async init () {
-      this.pptPageSite = 'http://editor.minslab.info/service-player?title=' + this.chapterName
+      this.pptPageSite = 'http://editor.minslab.info/service-player?title=' + this.chapterName + '#/'
+      if (this.pptPage !== 0 && this.pptPage != null && this.pptPage !== undefined) {
+        this.pptPageSite = 'http://editor.minslab.info/service-player?title=' + this.chapterName + '#/' + this.pptPage
+      }
+      document.getElementById('ppt').src = this.pptPageSite
       // 获取实体数据
       try {
         this.entities = []
@@ -90,6 +98,7 @@ export default {
         console.log(e.message)
       }
       this.drawChapterChart(this.entities, this.relationships)
+      document.getElementById('ppt').src = document.getElementById('ppt').src
     },
     async updateStuEntity (nodeName) {
       const info = await findIsStuEntityExist({
@@ -105,7 +114,8 @@ export default {
           entityName: nodeName,
           course: this.courseName,
           count: 1,
-          recentDate: time
+          recentDate: time,
+          chapter: this.chapterName + '章节知识图谱'
         })
       } else {
         const info = await getCountByAccountAndCourse({
@@ -226,12 +236,12 @@ export default {
         var nodeName = params.name
         that.updateStuEntity(nodeName)
         that.pptPageSite = 'http://editor.minslab.info/service-player?title=' + that.chapterName + '#/' + that.enppts.get(nodeName)
-        that.refreshFrame()
+        document.getElementById('ppt').src = that.pptPageSite
       })
-    },
-    refreshFrame () {
-      document.getElementById('ppt').src = document.getElementById('ppt').src
     }
+    // refreshFrame () {
+    //   document.getElementById('ppt').src = document.getElementById('ppt').src
+    // }
   }
 }
 </script>
